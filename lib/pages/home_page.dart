@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:parking_lot/colors.dart';
 import '../containers/home_container.dart';
 import '../containers/my_items_container.dart';
 import '../containers/profile_container.dart';
@@ -16,13 +17,13 @@ class _HomePageState extends State<HomePage> {
   getColorForContainer() {
     switch (currentPageIndex) {
       case 0:
-        return Color.fromARGB(255, 190, 170, 170);
+        return CustomColors.background2;
       case 1:
-        return Color.fromARGB(255, 190, 170, 170);
+        return CustomColors.background2;
       case 2:
-        return Color.fromARGB(255, 190, 170, 170);
+        return CustomColors.background2;
       default:
-        return Color.fromARGB(255, 190, 170, 170);
+        return CustomColors.background2;
     }
   }
 
@@ -39,20 +40,30 @@ class _HomePageState extends State<HomePage> {
         },
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(
+              Icons.home,
+              color: CustomColors.icon,
+            ),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.apps),
+            icon: Icon(
+              Icons.apps,
+              color: CustomColors.icon,
+            ),
             label: 'My Items',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: Icon(
+              Icons.person,
+              color: CustomColors.icon,
+            ),
             label: 'Profile',
+
           ),
         ],
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.black,
+        selectedItemColor: CustomColors.icon,
+        unselectedItemColor: CustomColors.white,
       ),
       body: <Widget>[
         HomeContainer(),

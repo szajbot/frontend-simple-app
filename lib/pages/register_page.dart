@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../colors.dart';
 import '../components/my_buttom.dart';
 import '../components/my_textfield.dart';
 import '../components/square_tile.dart';
@@ -64,7 +65,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 210, 190, 190),
+      backgroundColor: CustomColors.background,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -77,6 +78,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const Icon(
                   Icons.lock_person_outlined ,
                   size: 130,
+                  color: CustomColors.icon,
                 ),
 
                 const SizedBox(height: 50),
@@ -111,61 +113,18 @@ class _RegisterPageState extends State<RegisterPage> {
                   paddingSize: 22,
                   horizontalSize: 25,
                   fontSize: 15,
-                  fontColor: Colors.white,
-                  buttonColor: Colors.black,
+                  fontColor: CustomColors.componentFont,
+                  buttonColor: CustomColors.component,
                 ),
                 const SizedBox(height: 20),
-
-                // continue with
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Divider(
-                          thickness: 0.5,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8, right: 8),
-                        child: Text(
-                          'OR',
-                          style: TextStyle(color: Colors.grey.shade800),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          thickness: 0.5,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SquareTile(
-                      onTap: () => null, //TODO AuthService().signInWithGoogle()
-                      imagePath: 'assets/xd.png',
-                      height: 50,
-                      width: 50,
-                      backgroundColor: Color.fromARGB(100, 100, 100, 100),
-                    ),
-                  ],
-                ),
 
                 SizedBox(
-                  height: MediaQuery.of(context).size.height - 750,
+                  height: MediaQuery.of(context).size.height - 650,
                 ),
 
                 Text(
                   'Already have an account? ',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  style: TextStyle(color: CustomColors.componentFont, fontSize: 12),
                 ),
 
                 const SizedBox(
@@ -178,8 +137,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   paddingSize: 7,
                   horizontalSize: 110,
                   fontSize: 12,
-                  fontColor: Colors.white,
-                  buttonColor: Colors.grey.shade800,
+                  fontColor: CustomColors.componentFont,
+                  buttonColor: CustomColors.component,
                 ),
               ],
             ),
