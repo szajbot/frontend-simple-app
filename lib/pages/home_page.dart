@@ -17,13 +17,13 @@ class _HomePageState extends State<HomePage> {
   getColorForContainer() {
     switch (currentPageIndex) {
       case 0:
-        return CustomColors.background2;
+        return CustomColors.background;
       case 1:
-        return CustomColors.background2;
+        return CustomColors.background;
       case 2:
-        return CustomColors.background2;
+        return CustomColors.background;
       default:
-        return CustomColors.background2;
+        return CustomColors.background;
     }
   }
 

@@ -7,7 +7,7 @@ class CustomColors {
   // static const Color darkBlue = Color.fromARGB(255, 0, 0, 139); // Dark Blue
   // static const Color orange = Color.fromARGB(255, 255, 165, 0); // Orange
   static const Color background = Color.fromARGB(255, 30, 30, 30);
-  static const Color background2 = Color.fromARGB(255, 30, 30, 30);
+  static const Color background2 = Color.fromARGB(255, 60, 60, 60);
   static const Color white = Color.fromARGB(255, 255, 255, 255);
   static const Color black = Color.fromARGB(255, 0, 0, 0);
   static const Color component = Color.fromARGB(255, 60, 60, 60);

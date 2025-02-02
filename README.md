@@ -2,15 +2,9 @@
 
 Simple frontend project
 
-## Getting Started
+## TODOS
 
-This project is a starting point for a Flutter application.
+ - Profile page
+ - Page with all my payments
+ - Something like dashboard page with: account balance, parking loot free spaces, parking loot price, curent parking ticket if active
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.

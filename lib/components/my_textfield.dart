@@ -6,11 +6,13 @@ class MyTextField extends StatelessWidget {
   final controller;
   final String hintText;
   final bool obscureText;
+  final bool enabled;
   const MyTextField({
     super.key,
     required this.controller,
     required this.hintText,
     required this.obscureText,
+    this.enabled = true,
   });
 
   @override
@@ -20,6 +22,7 @@ class MyTextField extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25),
         child: TextField(
+          enabled: enabled,
           controller: controller,
           obscureText: obscureText,
           decoration: InputDecoration(
