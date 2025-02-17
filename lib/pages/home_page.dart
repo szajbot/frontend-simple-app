@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:parking_lot/colors.dart';
-import '../containers/home_container.dart';
-import '../containers/my_items_container.dart';
+import '../containers/dashboard_container.dart';
+import '../containers/my_tickets_container.dart';
 import '../containers/profile_container.dart';
 
 class HomePage extends StatefulWidget {
@@ -44,14 +44,14 @@ class _HomePageState extends State<HomePage> {
               Icons.home,
               color: CustomColors.icon,
             ),
-            label: 'Home',
+            label: 'Dashboard',
           ),
           BottomNavigationBarItem(
             icon: Icon(
               Icons.apps,
               color: CustomColors.icon,
             ),
-            label: 'My Items',
+            label: 'My Tickets',
           ),
           BottomNavigationBarItem(
             icon: Icon(

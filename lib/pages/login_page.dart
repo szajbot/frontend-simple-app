@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:parking_lot/colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../components/my_buttom.dart';
 import '../components/my_textfield.dart';
@@ -25,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> signUserIn() async {
     final email = _emailController.text;
     final password = _passwordController.text;
-    final url = Uri.parse('https://yourapi.com/login');
+    final url = Uri.parse('http://10.0.2.2:8000/user/login'); // API URL
 
     showDialog(
         context: context,
@@ -35,48 +36,38 @@ class _LoginPageState extends State<LoginPage> {
           );
         });
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => HomePage()),
-    );
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json' // 'application/x-www-form-urlencoded' or whatever you need
+        },
+        body: jsonEncode({
+          "login": email,
+          "password": password
+        }),
+      );
 
-    // try {
-    //   final response = await http.post(
-    //     url,
-    //     body: json.encode({
-    //       'email': email,
-    //       'password': password,
-    //     }),
-    //     headers: {'Content-Type': 'application/json'},
-    //   );
-    //
-    //   if (response.statusCode == 200) {
-    //     // Assuming the response contains a success message or token
-    //     final responseData = json.decode(response.body);
-    //     if (responseData['success'] == true) {
-    //       // If login is successful, navigate to HomePage
-    //       Navigator.pushReplacement(
-    //         context,
-    //         MaterialPageRoute(builder: (context) => HomePage()),
-    //       );
-    //     } else {
-    //       // Handle failed login response
-    //       ScaffoldMessenger.of(context).showSnackBar(
-    //         const SnackBar(content: Text('Invalid credentials')),
-    //       );
-    //     }
-    //   } else {
-    //     // Handle unsuccessful response (non-200 status code)
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(content: Text('Login failed')),
-    //     );
-    //   }
-    // } catch (error) {
-    //   // Handle error in making request (e.g., no internet)
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(content: Text('An error occurred')),
-    //   );
-    // }
+      Navigator.pop(context); // Close loading indicator
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final user = data["user"];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_id', user["id"].toString());
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+      } else {
+        // Show error message
+        genericErrorMessage("Invalid email or password.");
+      }
+    } catch (e) {
+      Navigator.pop(context); // Close loading indicator
+      genericErrorMessage("Error connecting to server.");
+    }
   }
 
   void genericErrorMessage(String message) {
@@ -84,7 +75,8 @@ class _LoginPageState extends State<LoginPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(message),
+          title: Text("Login Error"),
+          content: Text(message),
           actions: [
             TextButton(
               onPressed: () {

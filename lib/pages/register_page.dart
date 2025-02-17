@@ -5,6 +5,11 @@ import '../components/my_buttom.dart';
 import '../components/my_textfield.dart';
 import '../components/square_tile.dart';
 
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'home_page.dart';
+import 'login_page.dart';
+
 class RegisterPage extends StatefulWidget {
   final Function()? onTap;
   RegisterPage({super.key, required this.onTap});
@@ -18,7 +23,16 @@ class _RegisterPageState extends State<RegisterPage> {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  void signUserUp() async {
+  Future<void> signUserUp() async {
+    final email = emailController.text;
+    final password = passwordController.text;
+    final confirmPassword = confirmPasswordController.text;
+
+    if (password != confirmPassword) {
+      genericErrorMessage("Passwords do not match!");
+      return;
+    }
+
     showDialog(
         context: context,
         builder: (context) {
@@ -27,28 +41,67 @@ class _RegisterPageState extends State<RegisterPage> {
           );
         });
 
-    if (passwordController.text == confirmPasswordController.text) {
-      try {
-        //TODO placeholder for registration
+    try {
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:8000/user/register'),
+        headers: {
+          'Content-Type': 'application/json' // 'application/x-www-form-urlencoded' or whatever you need
+        },
+        body: jsonEncode({
+          "login": email,
+          "password": password
+        }),
+      );
 
-        Navigator.pop(context);
-      } on Exception catch (e) {
-        Navigator.pop(context);
+      Navigator.pop(context);
 
-        genericErrorMessage(e as String);
+      if (response.statusCode == 200) {
+        successMessage("Account created successfully!");
+
+        Future.delayed(Duration(seconds: 2), () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage(onTap: widget.onTap)),
+          );
+        });
+      } else {
+        genericErrorMessage("Registration failed.");
       }
-    } else {
-      genericErrorMessage("Password don't match!");
+    } catch (e) {
+      Navigator.pop(context);
+      genericErrorMessage(e.toString());
     }
-
   }
 
+  /// ✅ Displays a success message
+  void successMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Success"),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// 🚨 Displays an error message
   void genericErrorMessage(String message) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(message),
+          title: Text("Registration Error"),
+          content: Text(message),
           actions: [
             TextButton(
               onPressed: () {

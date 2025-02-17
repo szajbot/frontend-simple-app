@@ -1,0 +1,2 @@
+C:/Users/Tobiasz/AndroidStudioProjects/parking_lot/android/app/.cxx/RelWithDebInfo/6c363d5t/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/Tobiasz/AndroidStudioProjects/parking_lot/android/app/.cxx/RelWithDebInfo/6c363d5t/arm64-v8a/CMakeFiles/rebuild_cache.dir

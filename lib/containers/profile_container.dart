@@ -121,8 +121,95 @@ class _ProfileContainerState extends State<ProfileContainer> {
                       buttonColor: CustomColors.component2,
                     ),
                   )),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Container(
+                    margin: EdgeInsets.fromLTRB(15, 50, 0, 0),
+                    child: Text(
+                      "Payments",
+                      style: TextStyle(
+                          fontSize: 28,
+                          color: CustomColors.white,
+                          fontWeight: FontWeight.bold),
+                    )),
+              ),
+              Divider(
+                thickness: 2.5,
+                color: Colors.grey.shade700,
+              ),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Container(
+                    margin: EdgeInsets.fromLTRB(40, 5, 0, 0),
+                    child: Text(
+                      "Balance",
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: CustomColors.white,
+                          fontWeight: FontWeight.bold),
+                    )),
+              ),
+              MyTextField(
+                hintText: '150zł',
+                obscureText: false,
+                controller: null,
+              ),
+              Align(
+                  alignment: Alignment.topLeft,
+                  child: Container(
+                    margin: EdgeInsets.fromLTRB(25, 15, 0, 0),
+                    alignment: Alignment.topLeft,
+                    width: 150,
+                    height: 50,
+                    child: MyButton(
+                      onTap: voidFunc,
+                      text: 'Add balance',
+                      paddingSize: 0,
+                      horizontalSize: 0,
+                      fontSize: 15,
+                      fontColor: CustomColors.componentFont,
+                      buttonColor: CustomColors.component2,
+                    ),
+                  )),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Container(
+                    margin: EdgeInsets.fromLTRB(15, 50, 0, 0),
+                    child: Text(
+                      "Other",
+                      style: TextStyle(
+                          fontSize: 28,
+                          color: CustomColors.white,
+                          fontWeight: FontWeight.bold),
+                    )),
+              ),
+              Divider(
+                thickness: 2.5,
+                color: Colors.grey.shade700,
+              ),
+              Align(
+                  alignment: Alignment.topLeft,
+                  child: Container(
+                    margin: EdgeInsets.fromLTRB(25, 15, 0, 0),
+                    alignment: Alignment.topLeft,
+                    width: 150,
+                    height: 50,
+                    child: MyButton(
+                      onTap: voidFunc,
+                      text: 'Logout',
+                      paddingSize: 0,
+                      horizontalSize: 0,
+                      fontSize: 15,
+                      fontColor: CustomColors.componentFont,
+                      buttonColor: CustomColors.component2,
+                    ),
+                  )),
+              SizedBox(
+                height: 100,
+              )
             ],
           ),
+
           // child: Column(
           //   children: [
           //     const SizedBox(
