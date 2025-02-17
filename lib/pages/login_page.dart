@@ -40,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
       final response = await http.post(
         url,
         headers: {
-          'Content-Type': 'application/json' // 'application/x-www-form-urlencoded' or whatever you need
+          'Content-Type': 'application/json'
         },
         body: jsonEncode({
           "login": email,

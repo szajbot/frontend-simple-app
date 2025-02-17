@@ -22,11 +22,15 @@ class _RegisterPageState extends State<RegisterPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  final nameController = TextEditingController();
+  final surnameController = TextEditingController();
 
   Future<void> signUserUp() async {
     final email = emailController.text;
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
+    final name = nameController.text;
+    final surname = surnameController.text;
 
     if (password != confirmPassword) {
       genericErrorMessage("Passwords do not match!");
@@ -49,7 +53,9 @@ class _RegisterPageState extends State<RegisterPage> {
         },
         body: jsonEncode({
           "login": email,
-          "password": password
+          "password": password,
+          "name": name,
+          "surname": surname
         }),
       );
 
@@ -136,6 +142,20 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 const SizedBox(height: 50),
 
+                MyTextField(
+                  controller: nameController,
+                  hintText: 'Name',
+                  obscureText: false,
+                ),
+                const SizedBox(height: 15),
+
+                MyTextField(
+                  controller: surnameController,
+                  hintText: 'Surname',
+                  obscureText: false,
+                ),
+                const SizedBox(height: 15),
+
                 //username
                 MyTextField(
                   controller: emailController,
@@ -172,7 +192,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 20),
 
                 SizedBox(
-                  height: MediaQuery.of(context).size.height - 650,
+                  height: MediaQuery.of(context).size.height - 800,
                 ),
 
                 Text(
