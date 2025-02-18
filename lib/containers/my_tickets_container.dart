@@ -1,9 +1,129 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../colors.dart';
 
 class MyItemsContainer extends StatefulWidget {
   @override
   State<MyItemsContainer> createState() => _MyItemsContainerState();
+}
+
+class _MyItemsContainerState extends State<MyItemsContainer> {
+  bool _isLoading = true;
+  late Future<List<Map<String, dynamic>>> _ticketsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticketsFuture = fetchTickets();
+  }
+
+  void showErrorMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Error"),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> fetchTickets() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String? userId = prefs.getString('user_id'); // Retrieve user ID
+
+      if (userId == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        showErrorMessage("User ID not found. Please log in again.");
+        return [];
+      }
+
+      final ticketUrl =
+          Uri.parse('http://10.0.2.2:8000/tickets/user/$userId'); // API URL
+      final ticketResponse = await http
+          .get(ticketUrl, headers: {'Content-Type': 'application/json'});
+
+      if (ticketResponse.statusCode == 200) {
+        final List<dynamic> decodedData = jsonDecode(ticketResponse.body);
+        final List<Map<String, dynamic>> filteredTickets = decodedData
+            .where((ticket) => ticket['exit_date'] != null)
+            .cast<Map<String, dynamic>>()
+            .toList();
+        return filteredTickets;
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        // showErrorMessage("Failed to load tickets.");
+        return [];
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      showErrorMessage("Error fetching tickets: ${e.toString()}");
+      return [];
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: CustomColors.background2,
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _ticketsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator()); // Loading indicator
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error loading tickets.'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+              child: Text(
+                'No tickets available.',
+                style: TextStyle(
+                  fontSize: 30, // Increased font size
+                  fontWeight: FontWeight.bold, // Bold text
+                  color: CustomColors.componentFont // Optional: change color for better visibility
+                ),
+              ),
+            );
+          } else {
+            // Generate TicketComponents from returned data
+            final tickets = snapshot.data!;
+            return SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: tickets.map((ticket) {
+                  return TicketComponent(
+                    ticketNumber: ticket['ticketNumber'] ?? 'N/A',
+                    start: ticket['start'] ?? 'Unknown',
+                    end: ticket['end'] ?? 'Unknown',
+                    cost: (ticket['cost'] ?? 0).toDouble(),
+                  );
+                }).toList(),
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
 }
 
 class TicketComponent extends StatelessWidget {
@@ -84,80 +204,6 @@ class TicketComponent extends StatelessWidget {
             const SizedBox(height: 16),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _MyItemsContainerState extends State<MyItemsContainer> {
-  // Simulating an API call
-  Future<List<Map<String, dynamic>>> fetchTickets() async {
-    await Future.delayed(Duration(seconds: 2)); // Simulate network delay
-    return [
-      {
-        'ticketNumber': '123456',
-        'start': '2025-02-02 16:20',
-        'end': '2025-02-02 18:20',
-        'cost': 5.50,
-      },
-      {
-        'ticketNumber': '123457',
-        'start': '2025-02-03 12:00',
-        'end': '2025-02-03 14:30',
-        'cost': 8.75,
-      },
-      {
-        'ticketNumber': '123458',
-        'start': '2025-02-04 09:00',
-        'end': '2025-02-04 10:45',
-        'cost': 4.25,
-      },
-      {
-        'ticketNumber': '123458',
-        'start': '2025-02-04 09:00',
-        'end': '2025-02-04 10:45',
-        'cost': 4.25,
-      },
-      {
-        'ticketNumber': '123458',
-        'start': '2025-02-04 09:00',
-        'end': '2025-02-04 10:45',
-        'cost': 4.25,
-      },
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: CustomColors.background2,
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: fetchTickets(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator()); // Loading indicator
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error loading tickets.'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No tickets available.'));
-          } else {
-            // Generate TicketComponents from returned data
-            final tickets = snapshot.data!;
-            return SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: tickets.map((ticket) {
-                  return TicketComponent(
-                    ticketNumber: ticket['ticketNumber'],
-                    start: ticket['start'],
-                    end: ticket['end'],
-                    cost: ticket['cost'],
-                  );
-                }).toList(),
-              ),
-            );
-          }
-        },
       ),
     );
   }
