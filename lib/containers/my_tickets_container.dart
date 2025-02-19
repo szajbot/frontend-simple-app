@@ -53,18 +53,14 @@ class _MyItemsContainerState extends State<MyItemsContainer> {
         return [];
       }
 
-      final ticketUrl =
-          Uri.parse('http://10.0.2.2:8000/tickets/user/$userId'); // API URL
+      final ticketUrl = Uri.parse(
+          'http://10.0.2.2:8000/tickets/user/$userId/notActive'); // API URL
       final ticketResponse = await http
           .get(ticketUrl, headers: {'Content-Type': 'application/json'});
 
       if (ticketResponse.statusCode == 200) {
         final List<dynamic> decodedData = jsonDecode(ticketResponse.body);
-        final List<Map<String, dynamic>> filteredTickets = decodedData
-            .where((ticket) => ticket['exit_date'] != null)
-            .cast<Map<String, dynamic>>()
-            .toList();
-        return filteredTickets;
+        return decodedData.cast<Map<String, dynamic>>().toList();
       } else {
         setState(() {
           _isLoading = false;
@@ -89,7 +85,8 @@ class _MyItemsContainerState extends State<MyItemsContainer> {
         future: _ticketsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator()); // Loading indicator
+            return Center(
+                child: CircularProgressIndicator()); // Loading indicator
           } else if (snapshot.hasError) {
             return Center(child: Text('Error loading tickets.'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -97,10 +94,11 @@ class _MyItemsContainerState extends State<MyItemsContainer> {
               child: Text(
                 'No tickets available.',
                 style: TextStyle(
-                  fontSize: 30, // Increased font size
-                  fontWeight: FontWeight.bold, // Bold text
-                  color: CustomColors.componentFont // Optional: change color for better visibility
-                ),
+                    fontSize: 30, // Increased font size
+                    fontWeight: FontWeight.bold, // Bold text
+                    color: CustomColors
+                        .componentFont // Optional: change color for better visibility
+                    ),
               ),
             );
           } else {
@@ -108,15 +106,21 @@ class _MyItemsContainerState extends State<MyItemsContainer> {
             final tickets = snapshot.data!;
             return SingleChildScrollView(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: tickets.map((ticket) {
-                  return TicketComponent(
-                    ticketNumber: ticket['ticketNumber'] ?? 'N/A',
-                    start: ticket['start'] ?? 'Unknown',
-                    end: ticket['end'] ?? 'Unknown',
-                    cost: (ticket['cost'] ?? 0).toDouble(),
-                  );
-                }).toList(),
+                children: [
+                  SizedBox(height: 50),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children:
+                    tickets.map((ticket) {
+                      return TicketComponent(
+                        ticketNumber: ticket['ticketNumber'] ?? 'N/A',
+                        start: ticket['start'] ?? 'Unknown',
+                        end: ticket['end'] ?? 'Unknown',
+                        cost: (ticket['cost'] ?? 0).toDouble(),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
             );
           }
