@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../colors.dart';
+import '../components/my_buttom.dart';
 
 class MyItemsContainer extends StatefulWidget {
   @override
@@ -18,6 +19,57 @@ class _MyItemsContainerState extends State<MyItemsContainer> {
   void initState() {
     super.initState();
     _ticketsFuture = fetchTickets();
+  }
+
+  Future<void> payForTicket(String ticketNumber) async {
+    try {
+
+      final prefs = await SharedPreferences.getInstance();
+      String? userId = prefs.getString('user_id'); // Retrieve user ID
+
+      if (userId == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        showErrorMessage("User ID not found. Please log in again.");
+      }
+
+      final ticketUrl = Uri.parse(
+          'http://10.0.2.2:8000/tickets/pay/$userId/$ticketNumber'); // API URL
+      final ticketResponse = await http
+          .post(ticketUrl, headers: {'Content-Type': 'application/json'});
+
+      if (ticketResponse.statusCode == 200) {
+        setState(() {
+          _ticketsFuture = fetchTickets(); // Refresh tickets after payment
+          showErrorMessage("Ticket payed successfully.");
+        });
+      } else {
+        showErrorMessage("Failed to pay for ticket.");
+      }
+    } catch (e) {
+      showErrorMessage("Error processing payment: ${e.toString()}");
+    }
+  }
+
+  void showOkMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Success"),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void showErrorMessage(String message) {
@@ -54,7 +106,7 @@ class _MyItemsContainerState extends State<MyItemsContainer> {
       }
 
       final ticketUrl = Uri.parse(
-          'http://10.0.2.2:8000/tickets/user/$userId/notActive'); // API URL
+          'http://10.0.2.2:8000/tickets/user/$userId/deactivate'); // API URL
       final ticketResponse = await http
           .get(ticketUrl, headers: {'Content-Type': 'application/json'});
 
@@ -110,13 +162,18 @@ class _MyItemsContainerState extends State<MyItemsContainer> {
                   SizedBox(height: 50),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children:
-                    tickets.map((ticket) {
+                    children: tickets.map((ticket) {
                       return TicketComponent(
-                        ticketNumber: ticket['ticketNumber'] ?? 'N/A',
-                        start: ticket['start'] ?? 'Unknown',
-                        end: ticket['end'] ?? 'Unknown',
-                        cost: (ticket['cost'] ?? 0).toDouble(),
+                        ticketNumber: ticket['id'].toString(),
+                        start: ticket['entrance_date'] ?? 'Unknown',
+                        end: ticket['exit_date'] ?? 'Unknown',
+                        cost: (ticket['amount'] ?? 0).toDouble(),
+                        payed: (ticket['payed'] == true ? true: false),
+                        registrationNumber:
+                            ticket['registration'] ?? 'Unknown',
+                        model: ticket['model'] ?? 'Unknown',
+                        brand: ticket['brand'] ?? 'Unknown',
+                        onPay: payForTicket, // Pass the function
                       );
                     }).toList(),
                   ),
@@ -135,6 +192,11 @@ class TicketComponent extends StatelessWidget {
   final String start;
   final String end;
   final double cost;
+  final bool payed;
+  final String registrationNumber;
+  final String model;
+  final String brand;
+  final Function(String) onPay; // Callback for payment
 
   const TicketComponent({
     Key? key,
@@ -142,6 +204,11 @@ class TicketComponent extends StatelessWidget {
     required this.start,
     required this.end,
     required this.cost,
+    required this.payed,
+    required this.registrationNumber,
+    required this.model,
+    required this.brand,
+    required this.onPay,
   }) : super(key: key);
 
   @override
@@ -164,39 +231,72 @@ class TicketComponent extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Icon(
-                Icons.local_parking,
-                size: 50,
-                color: Colors.white,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  margin: EdgeInsetsDirectional.only(start: 20),
+                  child: Icon(Icons.local_parking, size: 50, color: Colors.white),
+                ),
+                Text(
+                  "Ticket#: $ticketNumber",
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white54),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            Divider(thickness: 1.5, color: Colors.grey.shade300),
             Text(
-              'Ticket #$ticketNumber',
+              'Start: $start',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 18,
                 fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
             ),
-            const SizedBox(height: 12),
             Text(
-              'From: $start',
+              'End: $end',
               style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'To: $end',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
+            Container(
+              margin: EdgeInsetsDirectional.only(start: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Registration number: $registrationNumber',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    'Brand: $brand',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    'Model: $model',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
             Text(
               'Cost: ${cost.toStringAsFixed(2)} PLN',
               style: TextStyle(
@@ -205,10 +305,41 @@ class TicketComponent extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            !payed
+                ? Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Your ticket is still unpaid!',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                MyButton(
+                  onTap: () => onPay(ticketNumber), // Correct callback usage
+                  text: 'Pay Now!',
+                  paddingSize: 4,
+                  horizontalSize: 15,
+                  fontSize: 16,
+                  fontColor: CustomColors.componentFont,
+                  buttonColor: CustomColors.background2,
+                ),
+              ],
+            )
+                : Text(
+              'Your ticket is already paid :)',
+              style: TextStyle(
+                color: Colors.white54,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
