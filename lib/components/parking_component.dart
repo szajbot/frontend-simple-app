@@ -9,7 +9,17 @@ class ParkingComponent extends StatelessWidget {
   final int occupiedSpots;
   final String imageUrl;
 
-  const ParkingComponent({
+  final _firstStyle = TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.bold,
+      fontSize: 18);
+
+  final _secondStyle = TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.bold,
+      fontSize: 14);
+
+  ParkingComponent({
     Key? key,
     required this.name,
     required this.address,
@@ -37,12 +47,22 @@ class ParkingComponent extends StatelessWidget {
           // Background Image
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              'https://picsum.photos/id/870/200/300?grayscale&blur=2',
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+            child: Stack(children: <Widget>[
+              Image(
+                image: AssetImage(imageUrl),
+                height: 200,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+              Positioned.fill(
+                child: Opacity(
+                  opacity: 0.6,
+                  child: Container(
+                    color: const Color(0xFF000000),
+                  ),
+                ),
+              ),
+            ]),
           ),
           // Content Overlay
           Container(
@@ -50,7 +70,10 @@ class ParkingComponent extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               gradient: LinearGradient(
-                colors: [Colors.black.withOpacity(0.5), Colors.black.withOpacity(0.2)],
+                colors: [
+                  Colors.black.withOpacity(0.5),
+                  Colors.black.withOpacity(0.2)
+                ],
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
               ),
@@ -63,12 +86,25 @@ class ParkingComponent extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: TextStyle(fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                 ),
-                const SizedBox(height: 8),
-                Text('Address: $address', style: TextStyle(color: Colors.white70)),
-                Text('Free Spots: $freeSpots', style: TextStyle(color: Colors.white70)),
-                Text('Occupied Spots: $occupiedSpots', style: TextStyle(color: Colors.white70)),
+                const SizedBox(height: 16),
+                RichText(text: TextSpan(children: [
+                  TextSpan(text: 'Address: ', style: _firstStyle),
+                  TextSpan(text: ' $address', style: _secondStyle),
+                ])),
+                const SizedBox(height: 5),
+                RichText(text: TextSpan(children: [
+                  TextSpan(text: 'Free Spots: ', style: _firstStyle),
+                  TextSpan(text: ' $freeSpots', style: _secondStyle),
+                ])),
+                const SizedBox(height: 5),
+                RichText(text: TextSpan(children: [
+                  TextSpan(text: 'Occupied Spots: ', style: _firstStyle),
+                  TextSpan(text: ' $occupiedSpots', style: _secondStyle),
+                ])),
               ],
             ),
           ),
