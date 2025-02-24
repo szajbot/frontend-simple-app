@@ -52,9 +52,9 @@ class _LoginPageState extends State<LoginPage> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final user = data["user"];
+        final user = data["id"];
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('user_id', user["id"].toString());
+        await prefs.setString('user_id', user.toString());
 
         Navigator.pushReplacement(
           context,

@@ -43,10 +43,15 @@ class _HomeContainerState extends State<HomeContainer> {
       final activeTicketsResponse = await http.get(activeTicketsUrl, headers: {'Content-Type': 'application/json'});
 
       if (balanceResponse.statusCode == 200 &&
-          activeTicketsResponse.statusCode == 200) {
+          (activeTicketsResponse.statusCode == 200 || activeTicketsResponse.statusCode == 404)) {
 
         final balanceData = jsonDecode(balanceResponse.body);
-        final List<dynamic> activeTicketsData = jsonDecode(activeTicketsResponse.body);
+        List<dynamic> activeTicketsData;
+        if (activeTicketsResponse.statusCode == 404) {
+          activeTicketsData = [];
+        } else {
+          activeTicketsData = jsonDecode(activeTicketsResponse.body);
+        }
         final List<dynamic> parkingDetailsData =
           [
             {
@@ -74,7 +79,7 @@ class _HomeContainerState extends State<HomeContainer> {
 
         return {
           'accountBalance': _balance,
-          'currentTicket': activeTicketsData.isNotEmpty ? activeTicketsData[0] : null,
+          'currentTicket': activeTicketsData.isNotEmpty  ? activeTicketsData[0] : null,
           'parkingDetails': parkingDetailsData,
         };
       } else {
@@ -153,7 +158,7 @@ class _HomeContainerState extends State<HomeContainer> {
                         child: CurrentTicketComponent(
                           ticketNumber: currentTicket['id'].toString(),
                           entranceDate: currentTicket['entrance_date'] ?? 'Unknown',
-                          registration: currentTicket['registration_number'] ?? 'Unknown',
+                          registration: currentTicket['registration'] ?? 'Unknown',
                           parkingName: currentTicket['parking_name'] ?? 'Parking UNIWERSUM',
                           location: currentTicket['location'] ?? 'Al. Jerozolimskie 56, 00-803 Warszawa',
                         ),
