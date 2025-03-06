@@ -1,1 +1,0 @@
-C:\Users\Tobiasz\AndroidStudioProjects\parking_lot\build\app\intermediates\cxx\RelWithDebInfo\6c363d5t\obj\armeabi-v7a
