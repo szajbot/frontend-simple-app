@@ -37,13 +37,22 @@ class _HomeContainerState extends State<HomeContainer> {
       }
 
       final balanceUrl = Uri.parse('http://10.0.2.2:8000/drivers/$userId/balance');
-      final balanceResponse = await http.get(balanceUrl, headers: {'Content-Type': 'application/json'});
-
       final activeTicketsUrl = Uri.parse('http://10.0.2.2:8000/tickets/user/$userId/active');
-      final activeTicketsResponse = await http.get(activeTicketsUrl, headers: {'Content-Type': 'application/json'});
+      final parkingsUrl = Uri.parse('http://10.0.2.2:8000/parkings');
 
-      if (balanceResponse.statusCode == 200 &&
-          (activeTicketsResponse.statusCode == 200 || activeTicketsResponse.statusCode == 404)) {
+      final responses = await Future.wait([
+        http.get(balanceUrl, headers: {'Content-Type': 'application/json'}),
+        http.get(activeTicketsUrl, headers: {'Content-Type': 'application/json'}),
+        http.get(parkingsUrl, headers: {'Content-Type': 'application/json'}),
+      ]);
+
+      final balanceResponse = responses[0];
+      final activeTicketsResponse = responses[1];
+      final parkingResponse = responses[2];
+
+      if (balanceResponse.statusCode == 200
+          && (activeTicketsResponse.statusCode == 200 || activeTicketsResponse.statusCode == 404)
+          && parkingResponse.statusCode == 200) {
 
         final balanceData = jsonDecode(balanceResponse.body);
         List<dynamic> activeTicketsData;
@@ -52,25 +61,14 @@ class _HomeContainerState extends State<HomeContainer> {
         } else {
           activeTicketsData = jsonDecode(activeTicketsResponse.body);
         }
-        final List<dynamic> parkingDetailsData =
-          [
-            {
-              'name': 'Parking UNIWERSUM',
-              'address': 'Al. Jerozolimskie 56, 00-803 Warszawa',
-              'freeSpots': 17,
-              'occupiedSpots': 142,
-              'imageUrl': 'assets/parking_one.jpg',
-              // Placeholder image
-            },
-            {
-              'name': 'East Side Parking Garage',
-              'address': '456 East St, Suburbs',
-              'freeSpots': 35,
-              'occupiedSpots': 65,
-              'imageUrl': 'assets/parking_two.jpg',
-              // Placeholder image
-            },
-          ];
+        List<dynamic> parkingDetailsData = jsonDecode(parkingResponse.body);
+
+        if (parkingDetailsData.isNotEmpty) {
+          parkingDetailsData[0]['imageUrl'] = 'assets/parking_one.jpg';
+          if (parkingDetailsData.length > 1) {
+            parkingDetailsData[1]['imageUrl'] = 'assets/parking_two.jpg';
+          }
+        }
 
         setState(() {
           _isLoading = false;
@@ -138,49 +136,43 @@ class _HomeContainerState extends State<HomeContainer> {
             final parkingDetails = data['parkingDetails'];
 
             return SingleChildScrollView(
-              child: Center(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 50),
+              child: Column(
+                children: [
+                  const SizedBox(height: 50),
+
+                  Container(
+                    margin: EdgeInsets.all(10),
+                    width: double.infinity,
+                    height: 100,
+                    child: AccountBalanceComponent(balance: accountBalance ?? 0.0),
+                  ),
+                  if (currentTicket != null)
                     Container(
-                      margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                      margin: EdgeInsets.all(10),
                       width: double.infinity,
-                      height: 100,
-                      child: AccountBalanceComponent(
-                        balance: accountBalance ?? 0.0,
+                      height: 180,
+                      child: CurrentTicketComponent(
+                        ticketNumber: currentTicket['id'].toString(),
+                        entranceDate: currentTicket['entrance_date'] ?? 'Unknown',
+                        registration: currentTicket['registration'] ?? 'Unknown',
+                        parkingName: currentTicket['name'] ?? 'Unknown',
+                        location: currentTicket['address'] ?? 'Unknown',
                       ),
                     ),
-                    if (currentTicket != null)
-                      Container(
-                        margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                        width: double.infinity,
-                        height: 180,
-                        child: CurrentTicketComponent(
-                          ticketNumber: currentTicket['id'].toString(),
-                          entranceDate: currentTicket['entrance_date'] ?? 'Unknown',
-                          registration: currentTicket['registration'] ?? 'Unknown',
-                          parkingName: currentTicket['parking_name'] ?? 'Parking UNIWERSUM',
-                          location: currentTicket['location'] ?? 'Al. Jerozolimskie 56, 00-803 Warszawa',
-                        ),
+                  if (parkingDetails != null && parkingDetails.isNotEmpty)
+                    ...parkingDetails.map((parking) => Container(
+                      margin: EdgeInsets.all(10),
+                      width: double.infinity,
+                      height: 200,
+                      child: ParkingComponent(
+                        name: parking['name'] ?? 'Unknown',
+                        address: parking['address'] ?? 'Unknown',
+                        freeSpots: parking['free_spots'] ?? 0,
+                        occupiedSpots: parking['occupied_spots'] ?? 0,
+                        imageUrl: parking['imageUrl'] ?? '',
                       ),
-                    if (parkingDetails != null && parkingDetails.isNotEmpty)
-                      ...List.generate(parkingDetails.length, (index) {
-                        final parking = parkingDetails[index];
-                        return Container(
-                          margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                          width: double.infinity,
-                          height: 200,
-                          child: ParkingComponent(
-                            name: parking['name'] ?? 'Unknown',
-                            address: parking['address'] ?? 'Unknown',
-                            freeSpots: parking['freeSpots'] ?? 0,
-                            occupiedSpots: parking['occupiedSpots'] ?? 0,
-                            imageUrl: parking['imageUrl'] ?? '',
-                          ),
-                        );
-                      }),
-                  ],
-                ),
+                    )),
+                ],
               ),
             );
           }
